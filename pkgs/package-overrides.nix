@@ -357,6 +357,20 @@ in
             ];
         in
         ourPatches ++ upstreamPatches;
+
+      nativeBuildInputs = attrs.nativeBuildInputs ++ [
+        pkgs.bison
+      ];
+
+      postPatch = ''
+        echo '
+          # TODO: Add explanation here.
+          # See https://github.com/fossar/nix-phps/pull/104#issuecomment-1113964195
+          PHP_PROG_BISON([3.0.0])
+          PHP_PROG_RE2C([0.13.4])
+        ' | cat - ext/pdo/config.m4 > ext/pdo/config.m4.tmp
+        mv ext/pdo/config.m4{.tmp,}
+      '';
     });
 
     pdo_mysql =
