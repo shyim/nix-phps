@@ -36,44 +36,4 @@ jobs:
           name: fossar
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
-      - name: Set job parameters
-        id: params
-        run: |
-          branch=${{ matrix.php.branch }}
-          major=${branch%%.*}
-          minor=${branch#*.}
-          attr=php$major$minor
-          echo "::set-output name=major::$major"
-          echo "::set-output name=attr::$attr"
-
-      - name: Build PHP
-        run: nix-build -A outputs.checks.x86_64-linux.${{ steps.params.outputs.attr }}-php
-
-      - name: Build Imagick extension
-        run: nix-build -A outputs.checks.x86_64-linux.${{ steps.params.outputs.attr }}-imagick
-
-      - name: Build Redis extension
-        run: nix-build -A outputs.checks.x86_64-linux.${{ steps.params.outputs.attr }}-redis
-
-      - name: Build Redis 3 extension
-        if: ${{ steps.params.outputs.major < 8 }}
-        run: nix-build -A outputs.checks.x86_64-linux.${{ steps.params.outputs.attr }}-redis3
-
-      - name: Build MySQL extension
-        if: ${{ steps.params.outputs.major < 7 }}
-        run: nix-build -A outputs.checks.x86_64-linux.${{ steps.params.outputs.attr }}-mysql
-
-      - name: Build Xdebug extension
-        run: nix-build -A outputs.checks.x86_64-linux.${{ steps.params.outputs.attr }}-xdebug
-
-      - name: Build Tidy extension
-        run: nix-build -A outputs.checks.x86_64-linux.${{ steps.params.outputs.attr }}-tidy
-
-      - name: Check that composer PHAR works
-        run: nix-build -A outputs.checks.x86_64-linux.${{ steps.params.outputs.attr }}-composer-phar
-
-      - name: Validate php.extensions.mysqli default unix socket path
-        run: nix-build -A outputs.checks.x86_64-linux.${{ steps.params.outputs.attr }}-mysqli-socket-path
-
-      - name: Validate php.extensions.pdo_mysql default unix socket path
-        run: nix-build -A outputs.checks.x86_64-linux.${{ steps.params.outputs.attr }}-pdo_mysql-socket-path
+      - run: nix-shell run-flake-checks.nix --argstr branch "${{ matrix.php.branch }}"
